@@ -1,0 +1,20 @@
+[
+    {
+        "name": "Rose Delight",
+        "description": "Sweet rose scent with natural oils.",
+        "price": 15,
+        "image": "perfume1.jpg"
+    },
+    {
+        "name": "Lavender Calm",
+        "description": "Relaxing lavender fragrance.",
+        "price": 18,
+        "image": "perfume2.jpg"
+    },
+    {
+        "name": "Citrus Fresh",
+        "description": "Refreshing citrus aroma.",
+        "price": 12,
+        "image": "perfume3.jpg"
+    }
+]

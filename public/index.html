@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scentify - Homemade Perfume Shop</title>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Scentify</h1>
+        <p>Your Homemade Perfume Store</p>
+        <div class="cart-container">
+            <button id="cart-button" type="button" aria-haspopup="true" aria-expanded="false">
+                🛒 Cart <span class="cart-count-badge" id="cart-count">0</span>
+            </button>
+
+            <div id="cart-panel" class="cart-panel" hidden>
+                <div class="cart-panel-header">
+                    <span>Cart</span>
+                    <button id="cart-close" type="button" aria-label="Close cart">✕</button>
+                </div>
+
+                <div id="cart-items" class="cart-items"></div>
+
+                <div class="cart-panel-footer">
+                    <div class="cart-total-row">
+                        <span>Total</span>
+                        <span>$<span id="cart-total">0</span></span>
+                    </div>
+                    <button id="cart-clear" type="button" class="cart-clear-btn">Clear cart</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="perfume-list" id="perfume-list">
+            <!-- Perfumes will be loaded here by JS -->
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Scentify | Homemade Perfumes</p>
+    </footer>
+
+    <script>
+        window.onload = () => {
+            const STORAGE_KEY = 'scentify_cart_v1';
+
+            const cartButtonEl = document.getElementById('cart-button');
+            const cartPanelEl = document.getElementById('cart-panel');
+            const cartCloseEl = document.getElementById('cart-close');
+            const cartClearEl = document.getElementById('cart-clear');
+            const cartCountEl = document.getElementById('cart-count');
+            const cartTotalEl = document.getElementById('cart-total');
+            const cartItemsEl = document.getElementById('cart-items');
+
+            const loadCart = () => {
+                try {
+                    const raw = localStorage.getItem(STORAGE_KEY);
+                    const parsed = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(parsed) ? parsed : [];
+                } catch {
+                    return [];
+                }
+            };
+
+            const saveCart = () => {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
+            };
+
+            let cart = loadCart();
+
+            const getCartCount = () => cart.reduce((sum, item) => sum + (item.qty || 0), 0);
+            const getCartTotal = () => cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+            const openCart = () => {
+                cartPanelEl.hidden = false;
+                cartButtonEl.setAttribute('aria-expanded', 'true');
+            };
+
+            const closeCart = () => {
+                cartPanelEl.hidden = true;
+                cartButtonEl.setAttribute('aria-expanded', 'false');
+            };
+
+            const toggleCart = () => {
+                if (cartPanelEl.hidden) {
+                    openCart();
+                } else {
+                    closeCart();
+                }
+            };
+
+            const renderCart = () => {
+                cartCountEl.textContent = String(getCartCount());
+                cartTotalEl.textContent = String(getCartTotal());
+
+                cartItemsEl.innerHTML = '';
+
+                if (cart.length === 0) {
+                    const emptyEl = document.createElement('div');
+                    emptyEl.className = 'cart-empty';
+                    emptyEl.textContent = 'Your cart is empty.';
+                    cartItemsEl.appendChild(emptyEl);
+                    return;
+                }
+
+                cart.forEach((item) => {
+                    const row = document.createElement('div');
+                    row.className = 'cart-item';
+                    row.dataset.name = item.name;
+
+                    const info = document.createElement('div');
+                    info.className = 'cart-item-info';
+
+                    const nameEl = document.createElement('div');
+                    nameEl.className = 'cart-item-name';
+                    nameEl.textContent = item.name;
+
+                    const subEl = document.createElement('div');
+                    subEl.className = 'cart-item-sub';
+                    subEl.textContent = `$${item.price} × ${item.qty}`;
+
+                    info.appendChild(nameEl);
+                    info.appendChild(subEl);
+
+                    const controls = document.createElement('div');
+                    controls.className = 'cart-item-controls';
+
+                    const qtyControls = document.createElement('div');
+                    qtyControls.className = 'cart-qty-controls';
+
+                    const decBtn = document.createElement('button');
+                    decBtn.type = 'button';
+                    decBtn.className = 'cart-qty-btn';
+                    decBtn.dataset.action = 'dec';
+                    decBtn.textContent = '−';
+
+                    const qtyEl = document.createElement('span');
+                    qtyEl.className = 'cart-qty';
+                    qtyEl.textContent = String(item.qty);
+
+                    const incBtn = document.createElement('button');
+                    incBtn.type = 'button';
+                    incBtn.className = 'cart-qty-btn';
+                    incBtn.dataset.action = 'inc';
+                    incBtn.textContent = '+';
+
+                    qtyControls.appendChild(decBtn);
+                    qtyControls.appendChild(qtyEl);
+                    qtyControls.appendChild(incBtn);
+
+                    const removeBtn = document.createElement('button');
+                    removeBtn.type = 'button';
+                    removeBtn.className = 'cart-remove-btn';
+                    removeBtn.dataset.action = 'remove';
+                    removeBtn.textContent = 'Remove';
+
+                    controls.appendChild(qtyControls);
+                    controls.appendChild(removeBtn);
+
+                    row.appendChild(info);
+                    row.appendChild(controls);
+
+                    cartItemsEl.appendChild(row);
+                });
+            };
+
+            const addToCart = (perfume) => {
+                const existingIndex = cart.findIndex((p) => p.name === perfume.name);
+                if (existingIndex >= 0) {
+                    cart[existingIndex].qty += 1;
+                } else {
+                    cart.push({
+                        name: perfume.name,
+                        price: perfume.price,
+                        image: perfume.image,
+                        qty: 1,
+                    });
+                }
+                saveCart();
+                renderCart();
+                openCart();
+            };
+
+            cartButtonEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                toggleCart();
+            });
+            cartCloseEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeCart();
+            });
+            cartPanelEl.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+            document.addEventListener('click', () => {
+                closeCart();
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closeCart();
+                }
+            });
+
+            cartClearEl.addEventListener('click', () => {
+                cart = [];
+                saveCart();
+                renderCart();
+            });
+
+            cartItemsEl.addEventListener('click', (e) => {
+                const actionBtn = e.target.closest('button[data-action]');
+                if (!actionBtn) return;
+
+                const row = actionBtn.closest('.cart-item');
+                if (!row) return;
+
+                const name = row.dataset.name;
+                const index = cart.findIndex((p) => p.name === name);
+                if (index < 0) return;
+
+                const action = actionBtn.dataset.action;
+
+                if (action === 'inc') {
+                    cart[index].qty += 1;
+                }
+                if (action === 'dec') {
+                    cart[index].qty -= 1;
+                    if (cart[index].qty <= 0) {
+                        cart.splice(index, 1);
+                    }
+                }
+                if (action === 'remove') {
+                    cart.splice(index, 1);
+                }
+
+                saveCart();
+                renderCart();
+            });
+
+            renderCart();
+
+            fetch('/api/perfumes')
+                .then((res) => res.json())
+                .then((data) => {
+                    const list = document.getElementById('perfume-list');
+                    data.forEach((perfume) => {
+                        const div = document.createElement('div');
+                        div.classList.add('perfume-item');
+
+                        const imagePath = `images/${perfume.image}`;
+                        const imgTag = `<img src="${imagePath}" alt="${perfume.name}" 
+                                        onerror="this.onerror=null;this.src='images/placeholder.png';">`;
+
+                        div.innerHTML = `
+                            ${imgTag}
+                            <h3>${perfume.name}</h3>
+                            <p>${perfume.description}</p>
+                            <p class="price">$${perfume.price}</p>
+                            <button type="button">Add to Cart</button>
+                        `;
+
+                        div.querySelector('button').addEventListener('click', () => {
+                            addToCart(perfume);
+                        });
+
+                        list.appendChild(div);
+                    });
+                })
+                .catch(() => {
+                    const list = document.getElementById('perfume-list');
+                    const errorEl = document.createElement('p');
+                    errorEl.textContent = 'Could not load perfumes. Please refresh.';
+                    list.appendChild(errorEl);
+                });
+        };
+    </script>
+
+</body>
+</html>
