@@ -8,27 +8,31 @@
 </head>
 <body>
     <header>
-        <h1>Scentify</h1>
+        <h1>ScentStore</h1>
         <p>Your Homemade Perfume Store</p>
-        <div class="cart-container">
-            <button id="cart-button" type="button" aria-haspopup="true" aria-expanded="false">
-                🛒 Cart <span class="cart-count-badge" id="cart-count">0</span>
-            </button>
+        <div class="header-actions">
+            <a class="auth-link" href="auth.html">Login / Sign up</a>
 
-            <div id="cart-panel" class="cart-panel" hidden>
-                <div class="cart-panel-header">
-                    <span>Cart</span>
-                    <button id="cart-close" type="button" aria-label="Close cart">✕</button>
-                </div>
+            <div class="cart-container">
+                <button id="cart-button" type="button" aria-haspopup="true" aria-expanded="false">
+                    🛒 Cart <span class="cart-count-badge" id="cart-count">0</span>
+                </button>
 
-                <div id="cart-items" class="cart-items"></div>
-
-                <div class="cart-panel-footer">
-                    <div class="cart-total-row">
-                        <span>Total</span>
-                        <span>$<span id="cart-total">0</span></span>
+                <div id="cart-panel" class="cart-panel" hidden>
+                    <div class="cart-panel-header">
+                        <span>Cart</span>
+                        <button id="cart-close" type="button" aria-label="Close cart">✕</button>
                     </div>
-                    <button id="cart-clear" type="button" class="cart-clear-btn">Clear cart</button>
+
+                    <div id="cart-items" class="cart-items"></div>
+
+                    <div class="cart-panel-footer">
+                        <div class="cart-total-row">
+                            <span>Total</span>
+                            <span>$<span id="cart-total">0</span></span>
+                        </div>
+                        <button id="cart-clear" type="button" class="cart-clear-btn">Clear cart</button>
+                    </div>
                 </div>
             </div>
         </div>
